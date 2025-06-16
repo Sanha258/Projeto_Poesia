@@ -34,7 +34,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         );
 
         AcessoEntity acesso = new AcessoEntity(
-            "USER",
+            usuario.getEmail(),
             senhaHash,
             usuario
         );
@@ -46,6 +46,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         return usuarioSalvo;
     }
 
+    @Override
     public void deletarUsuario(Long id){
         
     }

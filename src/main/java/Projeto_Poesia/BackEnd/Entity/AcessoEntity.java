@@ -7,15 +7,18 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 
 @Entity
+@Table(name = "acesso")
 public class AcessoEntity {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String tipoAcesso;
+    @Column(nullable = false, unique = true)
+    private String login;
 
     @Column(length = 64, nullable = false)
     private String senha;
@@ -25,8 +28,8 @@ public class AcessoEntity {
     private UsuarioEntity usuario;
 
     public AcessoEntity() {}
-    public AcessoEntity(String tipoAcesso, String senha, UsuarioEntity usuario) {
-        this.tipoAcesso = tipoAcesso;
+    public AcessoEntity(String login, String senha, UsuarioEntity usuario) {
+        this.login = login;
         this.senha = senha;
         this.usuario = usuario;
     }
@@ -38,11 +41,11 @@ public class AcessoEntity {
         this.id = id;
     }
 
-    public String getTipoAcesso() {
-        return tipoAcesso;
+    public String getLogin() {
+        return login;
     }
-    public void setTipoAcesso(String tipoAcesso) {
-        this.tipoAcesso = tipoAcesso;
+    public void setLogin(String login) {
+        this.login = login;
     }
 
     public String getSenha() {
