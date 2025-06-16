@@ -1,5 +1,8 @@
 package Projeto_Poesia.BackEnd.Service.Impl;
 
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -47,8 +50,42 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
+    public List<UsuarioEntity> listarUsuarios(){
+        return usuarioRepository.findAll();
+    }
+
+    @Override
+    public Optional<UsuarioEntity> buscarUsuarioPorId(Long id){
+        return usuarioRepository.findById(id);
+    }
+
+    @Override
+    public UsuarioEntity atualizarUsuario(Long id, UsuarioDTO usuarioDTO){
+        Optional<UsuarioEntity> optionalUsuario = usuarioRepository.findById(id);
+        if (optionalUsuario.isEmpty()) {
+            throw new RuntimeException("Usuário não encontrado com o Id: " + id);
+        }
+
+        UsuarioEntity usuario = optionalUsuario.get();
+        usuario.setNome(usuarioDTO.getNome());
+        usuario.setEmail(usuarioDTO.getEmail());
+        usuario.setUser(usuarioDTO.getUser());
+
+        return usuarioRepository.save(usuario);
+    }
+
+    @Override
     public void deletarUsuario(Long id){
-        
+        Optional<UsuarioEntity> optionalUsuario = usuarioRepository.findById(id);
+        if (optionalUsuario.isPresent()) {
+            UsuarioEntity usuario = optionalUsuario.get();
+            if (usuario.getAcesso() != null) {
+                acessoRepository.delete(usuario.getAcesso());
+            }
+            usuarioRepository.delete(usuario);
+        } else {
+            throw new RuntimeException("Usuário não encontrado com o Id: " + id);
+        }
     }
 
 }
