@@ -15,7 +15,7 @@ public interface CategoriaService {
 
     List<CategoriaEntity> listarCategorias();
 
-    Optional<CategoriaEntity> buscarCategoriaPorId(Long id);
+    CategoriaEntity buscarCategoriaPorId(Long id);
 
     void deletarCategoria(Long id, Long usuarioId);
     

@@ -35,22 +35,23 @@ public class CategoriaServiceImpl implements CategoriaService {
 
     @Override
     public List<CategoriaEntity> listarCategorias() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'listarCategorias'");
+        return categoriaRepository.findAll();
     }
 
     @Override
-    public Optional<CategoriaEntity> buscarCategoriaPorId(Long id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'buscarCategoriaPorId'");
+    public CategoriaEntity buscarCategoriaPorId(Long id) {
+        return categoriaRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Categoria não encontrada!"));
     }
 
     @Override
     public void deletarCategoria(Long id, Long usuarioId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'deletarCategoria'");
+        CategoriaEntity categoria = buscarCategoriaPorId(id);
+
+        if (!categoria.getUsuario().getId().equals(usuarioId)) {
+            throw new IllegalArgumentException("Você não tem permissão para excluir esta categoria!");
+        }
+
+        categoriaRepository.delete(categoria);
     }
     
-
-
 }
