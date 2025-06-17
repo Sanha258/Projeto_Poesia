@@ -1,11 +1,8 @@
 package Projeto_Poesia.BackEnd.Service.Impl;
 
 import java.util.List;
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import Projeto_Poesia.BackEnd.DTO.CategoriaDTO;
 import Projeto_Poesia.BackEnd.Entity.CategoriaEntity;
 import Projeto_Poesia.BackEnd.Entity.UsuarioEntity;

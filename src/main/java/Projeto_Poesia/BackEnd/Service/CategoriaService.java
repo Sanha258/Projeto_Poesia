@@ -1,10 +1,7 @@
 package Projeto_Poesia.BackEnd.Service;
 
 import java.util.List;
-import java.util.Optional;
-
 import org.springframework.stereotype.Service;
-
 import Projeto_Poesia.BackEnd.DTO.CategoriaDTO;
 import Projeto_Poesia.BackEnd.Entity.CategoriaEntity;
 

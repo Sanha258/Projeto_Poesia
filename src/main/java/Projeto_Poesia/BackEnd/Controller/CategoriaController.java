@@ -1,7 +1,6 @@
 package Projeto_Poesia.BackEnd.Controller;
 
 import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -10,7 +9,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import Projeto_Poesia.BackEnd.DTO.CategoriaDTO;
 import Projeto_Poesia.BackEnd.Entity.CategoriaEntity;
@@ -47,8 +45,8 @@ public class CategoriaController {
         }
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deletarCategoria(@PathVariable Long id, @RequestParam Long usuarioId){
+    @DeleteMapping("/{id}/{usuarioId}")
+    public ResponseEntity<?> deletarCategoria(@PathVariable Long id, @PathVariable Long usuarioId){
         try {
             categoriaService.deletarCategoria(id, usuarioId);
             return ResponseEntity.ok("Categoria excluída com sucesso!");

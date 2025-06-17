@@ -1,7 +1,6 @@
 package Projeto_Poesia.BackEnd.Controller;
 
 import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -12,7 +11,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import Projeto_Poesia.BackEnd.DTO.UsuarioDTO;
 import Projeto_Poesia.BackEnd.Entity.UsuarioEntity;
 import Projeto_Poesia.BackEnd.Service.UsuarioService;
