@@ -12,12 +12,11 @@ public interface PoemaRepository extends JpaRepository <PoemaEntity, Long>{
 
     // Busca poemas por autor (usuário)
     List<PoemaEntity> findByAutorId(Long autorId);
-
-    // Busca poemas por categoria
     List<PoemaEntity> findByCategoriaId(Long categoriaId);
+    List<PoemaEntity> findByTituloContainingIgnoreCaseAndAutorId(String titulo, Long autor);
 
     // Busca poemas por título (contendo o texto, case insensitive)
-    List<PoemaEntity> findByTituloContainingIgnoreCase(String titulo);
+    List<PoemaEntity> findByTituloContainingIgnoreCase(String titulo); 
 
     // Busca poemas por conteúdo (contendo o texto)
     @Query("SELECT p FROM PoemaEntity p WHERE p.conteudo LIKE %:termo%")
@@ -25,5 +24,7 @@ public interface PoemaRepository extends JpaRepository <PoemaEntity, Long>{
 
     // Busca os últimos 10 poemas ordenados por data (para home)
     List<PoemaEntity> findTop10ByOrderByDataDesc();
+
+   
     
 }

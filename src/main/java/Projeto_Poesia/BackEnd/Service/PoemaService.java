@@ -13,5 +13,12 @@ public interface PoemaService {
     PoemaEntity cadastrarPoema(PoemaDTO poemaDTO);
     List<PoemaEntity> listarPoemas();
     PoemaEntity buscarPoema(Long id);
+    PoemaEntity atualizarPoema(Long id, PoemaDTO poemaDTO);
     void deletarPoema(Long id, Long autor);
+    List<PoemaEntity> listarPorAutor(Long autor);
+    List<PoemaEntity> listarPorCategoria(Long categoria);
+    List<PoemaEntity> buscarPorTitulo(String titulo);
+
+
+    
 }

@@ -43,6 +43,10 @@ public class PoemaServiceImp implements PoemaService {
                 throw new IllegalArgumentException("O conteúdo do poema é obrigatório.");
             }
 
+             // Validação de caracteres especiais
+            ValidacaoUtil.validarCaracteres(poemaDTO.getTitulo(), "título");
+            ValidacaoUtil.validarCaracteres(poemaDTO.getConteudo(), "conteúdo");
+
             if (poemaDTO.getConteudo().length() > 10000) {
                 throw new IllegalArgumentException("O conteúdo do poema deve ter no máximo 500 caracteres.");
             }
@@ -99,6 +103,74 @@ public class PoemaServiceImp implements PoemaService {
             throw new IllegalArgumentException("Erro ao excluir poema: " + e.getMostSpecificCause().getMessage());
         }
     }
+
+    @Override
+    @Transactional
+    public PoemaEntity atualizarPoema(Long id, PoemaDTO poemaDTO) {
+        try {
+            PoemaEntity poemaExistente = poemaRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Poema não encontrado."));
+
+            // Verifica se o autor do DTO é o mesmo do poema existente
+            if (!poemaExistente.getAutor().getId().equals(poemaDTO.getAutor())) {
+                throw new IllegalArgumentException("Apenas o autor pode editar o poema.");
+            }
+
+            // Validações
+            if (poemaDTO.getTitulo() != null && !poemaDTO.getTitulo().trim().isEmpty()) {
+                ValidacaoUtil.validarCaracteres(poemaDTO.getTitulo(), "título");
+                poemaExistente.setTitulo(poemaDTO.getTitulo().trim());
+            }
+
+            if (poemaDTO.getConteudo() != null && !poemaDTO.getConteudo().trim().isEmpty()) {
+                ValidacaoUtil.validarCaracteres(poemaDTO.getConteudo(), "conteúdo");
+                if (poemaDTO.getConteudo().length() > 10000) {
+                    throw new IllegalArgumentException("O conteúdo deve ter no máximo 10.000 caracteres.");
+                }
+                poemaExistente.setConteudo(poemaDTO.getConteudo().trim());
+            }
+
+            if (poemaDTO.getCategoria() != null) {
+                CategoriaEntity categoria = categoriaRepository.findById(poemaDTO.getCategoria())
+                    .orElseThrow(() -> new IllegalArgumentException("Categoria não encontrada."));
+                poemaExistente.setCategoria(categoria);
+            }
+
+            return poemaRepository.save(poemaExistente);
+            
+        } catch (DataIntegrityViolationException e) {
+            throw new IllegalArgumentException("Erro de integridade de dados: " + e.getMostSpecificCause().getMessage());
+        }
+    }
+
+    @Override
+    public List<PoemaEntity> listarPorAutor(Long autorId) {
+        if (autorId == null || autorId <= 0) {
+            throw new IllegalArgumentException("ID do autor inválido");
+        }
+        
+        // Verifica se o autor existe antes de buscar os poemas
+        if (!usuarioRepository.existsById(autorId)) {
+            throw new IllegalArgumentException("Autor com ID " + autorId + " não encontrado");
+        }
+        
+        return poemaRepository.findByAutorId(autorId);
+    }
+
+    @Override
+    public List<PoemaEntity> buscarPorTitulo(String titulo) {
+        return poemaRepository.findByTituloContainingIgnoreCase(titulo);
+    }
+
+    @Override
+    public List<PoemaEntity> listarPorCategoria(Long categoriaId) {
+        if (categoriaId == null || categoriaId <= 0) {
+            throw new IllegalArgumentException("ID da categoria inválido");
+        }
+    
+        return poemaRepository.findByCategoriaId(categoriaId);
+    }
+
 }
     
 
