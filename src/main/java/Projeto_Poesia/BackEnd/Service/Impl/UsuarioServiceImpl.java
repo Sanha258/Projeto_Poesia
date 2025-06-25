@@ -11,6 +11,7 @@ import Projeto_Poesia.BackEnd.Repository.AcessoRepository;
 import Projeto_Poesia.BackEnd.Repository.UsuarioRepository;
 import Projeto_Poesia.BackEnd.Service.UsuarioService;
 import Projeto_Poesia.BackEnd.Service.util.HashUtil;
+import Projeto_Poesia.BackEnd.Mapper.UsuarioMapper;
 
 @Service
 public class UsuarioServiceImpl implements UsuarioService {
@@ -19,6 +20,8 @@ public class UsuarioServiceImpl implements UsuarioService {
     private UsuarioRepository usuarioRepository;
     @Autowired
     private AcessoRepository acessoRepository;
+    @Autowired
+    private UsuarioMapper usuarioMapper;
 
     @Override
     public UsuarioEntity cadastrarUsuario(UsuarioDTO usuarioDTO){
@@ -28,11 +31,7 @@ public class UsuarioServiceImpl implements UsuarioService {
 
         String senhaHash = HashUtil.gerarHashSHA256(usuarioDTO.getAcesso().getSenha());
 
-        UsuarioEntity usuario = new UsuarioEntity(
-            usuarioDTO.getNome(),
-            usuarioDTO.getEmail(),
-            usuarioDTO.getUser()
-        );
+        UsuarioEntity usuario = usuarioMapper.toEntity(usuarioDTO);
 
         AcessoEntity acesso = new AcessoEntity(
             usuario.getEmail(),
