@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,6 +21,7 @@ import Projeto_Poesia.BackEnd.Entity.PoemaEntity;
 import Projeto_Poesia.BackEnd.Service.PoemaService;
 
 @RestController
+@CrossOrigin(origins = "*")
 @RequestMapping("/poema")
 public class PoemaController {
 
@@ -73,6 +75,19 @@ public class PoemaController {
         }
     }
 
+    @GetMapping("/autor/username/{username}")
+    public ResponseEntity<?> listarPorAutorUsername(@PathVariable String username) {
+        try {
+            List<PoemaEntity> poemas = poemaService.listarPorAutorUsername(username);
+            if (poemas.isEmpty()) {
+                return ResponseEntity.noContent().build();
+            }
+            return ResponseEntity.ok(poemas);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
     @GetMapping("/categoria/{categoriaId}")
     public ResponseEntity<?> listarPorCategoria(@PathVariable Long categoriaId) {
         try {
@@ -96,6 +111,7 @@ public class PoemaController {
         
         return ResponseEntity.badRequest().build();
     }
+
     @DeleteMapping("/{id}/{autor}")
     public ResponseEntity<?> deletarPoema(@PathVariable Long id, @PathVariable Long autor) {
         try {
@@ -105,6 +121,4 @@ public class PoemaController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
-
 }

@@ -18,6 +18,7 @@ public interface PoemaService {
     List<PoemaEntity> listarPorAutor(Long autor);
     List<PoemaEntity> listarPorCategoria(Long categoria);
     List<PoemaEntity> buscarPorTitulo(String titulo);
+    List<PoemaEntity> listarPorAutorUsername(String user);
 
 
     

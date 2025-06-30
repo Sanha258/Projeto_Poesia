@@ -18,5 +18,7 @@ public interface UsuarioService {
    UsuarioEntity atualizarUsuario(Long id, UsuarioDTO usuarioDTO);
 
    void deletarUsuario(Long id);
+
+   UsuarioEntity validarLogin(String email, String senha);
     
 }

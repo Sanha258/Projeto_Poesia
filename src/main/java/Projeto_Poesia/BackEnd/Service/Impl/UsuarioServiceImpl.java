@@ -56,6 +56,32 @@ public class UsuarioServiceImpl implements UsuarioService {
     public Optional<UsuarioEntity> buscarUsuarioPorId(Long id){
         return usuarioRepository.findById(id);
     }
+    
+    @Override
+    public UsuarioEntity validarLogin(String email, String senha) {
+        // Busca o usuário pelo email
+        Optional<UsuarioEntity> optionalUsuario = usuarioRepository.findByEmail(email);
+        if (optionalUsuario.isEmpty()) {
+            throw new IllegalArgumentException("Email não cadastrado!");
+        }
+
+        UsuarioEntity usuario = optionalUsuario.get();
+        
+        // Verifica se o usuário tem acesso associado
+        if (usuario.getAcesso() == null) {
+            throw new IllegalArgumentException("Credenciais inválidas!");
+        }
+
+        // Gera o hash da senha fornecida para comparar com o hash armazenado
+        String senhaHash = HashUtil.gerarHashSHA256(senha);
+        
+        // Compara as senhas
+        if (!usuario.getAcesso().getSenha().equals(senhaHash)) {
+            throw new IllegalArgumentException("Senha incorreta!");
+        }
+
+        return usuario;
+    }
 
     @Override
     public UsuarioEntity atualizarUsuario(Long id, UsuarioDTO usuarioDTO){

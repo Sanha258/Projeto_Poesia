@@ -1,8 +1,11 @@
 package Projeto_Poesia.BackEnd.Controller;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,6 +19,7 @@ import Projeto_Poesia.BackEnd.Service.CategoriaService;
 
 @RestController
 @RequestMapping("/categoria")
+@CrossOrigin(origins = "*")
 public class CategoriaController {
     
     @Autowired
@@ -25,21 +29,37 @@ public class CategoriaController {
     public ResponseEntity<?> salvarCategoria(@RequestBody CategoriaDTO categoriaDTO) {
         try {
             CategoriaEntity categoria = categoriaService.cadastrarCategoria(categoriaDTO);
-            return ResponseEntity.ok(categoria);
+            // Retornar o DTO em vez da Entity
+            CategoriaDTO responseDTO = new CategoriaDTO();
+            responseDTO.setNome(categoria.getNome());
+            responseDTO.setUsuarioId(categoria.getUsuario().getId());
+            return ResponseEntity.ok(responseDTO);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
     @GetMapping
-    public ResponseEntity<List<CategoriaEntity>> listarCategoria(){
-        return ResponseEntity.ok(categoriaService.listarCategorias());
+    public ResponseEntity<List<CategoriaDTO>> listarCategoria(){
+        List<CategoriaEntity> categorias = categoriaService.listarCategorias();
+        // Converter Entity para DTO
+        List<CategoriaDTO> dtos = categorias.stream().map(c -> {
+            CategoriaDTO dto = new CategoriaDTO();
+            dto.setNome(c.getNome());
+            dto.setUsuarioId(c.getUsuario().getId());
+            return dto;
+        }).collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> buscarCategoriaPorId(@PathVariable Long id){
         try {
-            return ResponseEntity.ok(categoriaService.buscarCategoriaPorId(id));
+            CategoriaEntity categoria = categoriaService.buscarCategoriaPorId(id);
+            CategoriaDTO dto = new CategoriaDTO();
+            dto.setNome(categoria.getNome());
+            dto.setUsuarioId(categoria.getUsuario().getId());
+            return ResponseEntity.ok(dto);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -54,5 +74,4 @@ public class CategoriaController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
 }

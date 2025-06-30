@@ -6,4 +6,5 @@ import Projeto_Poesia.BackEnd.Entity.UsuarioEntity;
 
 public interface UsuarioRepository extends JpaRepository<UsuarioEntity, Long> {
     Optional<UsuarioEntity> findByEmail(String email);
+    Optional<UsuarioEntity> findByUser(String user);
 }
