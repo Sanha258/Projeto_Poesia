@@ -12,6 +12,7 @@ public class CategoriaMapper {
             return null;
         }
         CategoriaDTO dto = new CategoriaDTO();
+        dto.setId(categoriaEntity.getId());
         dto.setNome(categoriaEntity.getNome());
         if (categoriaEntity.getUsuario() != null) {
             dto.setUsuarioId(categoriaEntity.getUsuario().getId());
@@ -24,6 +25,7 @@ public class CategoriaMapper {
             return null;
         }
         CategoriaEntity entity = new CategoriaEntity();
+        entity.setId(categoriaDTO.getId());
         entity.setNome(categoriaDTO.getNome());
         entity.setUsuario(usuario);
         return entity;

@@ -2,17 +2,26 @@ package Projeto_Poesia.BackEnd.DTO;
 
 public class UsuarioDTO {
 
+    private Long id;
     private String nome;
     private String email;
     private String user;
     private AcessoDTO acesso;
     
     public UsuarioDTO() {}
-    public UsuarioDTO(String nome, String email, String user, AcessoDTO acesso) {
+    public UsuarioDTO(Long id, String nome, String email, String user, AcessoDTO acesso) {
+        this.id = id;
         this.nome = nome;
         this.email = email;
         this.user = user;
         this.acesso = acesso;
+    }
+
+    public Long getId() {
+        return id;
+    }
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getNome() {

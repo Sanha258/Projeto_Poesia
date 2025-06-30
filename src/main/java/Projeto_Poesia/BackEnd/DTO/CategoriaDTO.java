@@ -2,13 +2,22 @@ package Projeto_Poesia.BackEnd.DTO;
 
 public class CategoriaDTO {
     
+    private Long id;
     private String nome;
     private Long usuarioId;
 
     public CategoriaDTO() {}
-    public CategoriaDTO(String nome, Long usuarioId) {
+    public CategoriaDTO(Long id, String nome, Long usuarioId) {
+        this.id = id;
         this.nome = nome;
         this.usuarioId = usuarioId;
+    }
+    
+    public Long getId() {
+        return id;
+    }
+    public void setId(Long id) {
+        this.id = id;
     }
     
     public String getNome() {

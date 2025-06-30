@@ -6,8 +6,10 @@ import org.springframework.stereotype.Service;
 import Projeto_Poesia.BackEnd.DTO.CategoriaDTO;
 import Projeto_Poesia.BackEnd.Entity.CategoriaEntity;
 import Projeto_Poesia.BackEnd.Entity.UsuarioEntity;
+import Projeto_Poesia.BackEnd.Entity.PoemaEntity;
 import Projeto_Poesia.BackEnd.Repository.CategoriaRepository;
 import Projeto_Poesia.BackEnd.Repository.UsuarioRepository;
+import Projeto_Poesia.BackEnd.Repository.PoemaRepository;
 import Projeto_Poesia.BackEnd.Service.CategoriaService;
 import Projeto_Poesia.BackEnd.Mapper.CategoriaMapper;
 
@@ -18,6 +20,8 @@ public class CategoriaServiceImpl implements CategoriaService {
     private CategoriaRepository categoriaRepository;
     @Autowired
     private UsuarioRepository usuarioRepository;
+    @Autowired
+    private PoemaRepository poemaRepository;
     @Autowired
     private CategoriaMapper categoriaMapper;
 
@@ -50,6 +54,12 @@ public class CategoriaServiceImpl implements CategoriaService {
 
         if (!categoria.getUsuario().getId().equals(usuarioId)) {
             throw new IllegalArgumentException("Você não tem permissão para excluir esta categoria!");
+        }
+
+        // Verificar se existem poemas associados a esta categoria
+        List<PoemaEntity> poemasAssociados = poemaRepository.findByCategoriaId(id);
+        if (!poemasAssociados.isEmpty()) {
+            throw new IllegalArgumentException("Não é possível excluir esta categoria pois existem poemas associados a ela. Delete os poemas primeiro.");
         }
 
         categoriaRepository.delete(categoria);
