@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 import Projeto_Poesia.BackEnd.DTO.CategoriaDTO;
 import Projeto_Poesia.BackEnd.Entity.CategoriaEntity;
 import Projeto_Poesia.BackEnd.Service.CategoriaService;
+import Projeto_Poesia.BackEnd.Mapper.CategoriaMapper;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/categoria")
@@ -20,26 +22,35 @@ public class CategoriaController {
     
     @Autowired
     private CategoriaService categoriaService;
+    @Autowired
+    private CategoriaMapper categoriaMapper;
 
     @PostMapping
     public ResponseEntity<?> salvarCategoria(@RequestBody CategoriaDTO categoriaDTO) {
         try {
             CategoriaEntity categoria = categoriaService.cadastrarCategoria(categoriaDTO);
-            return ResponseEntity.ok(categoria);
+            CategoriaDTO categoriaRetorno = categoriaMapper.toDTO(categoria);
+            return ResponseEntity.ok(categoriaRetorno);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
     @GetMapping
-    public ResponseEntity<List<CategoriaEntity>> listarCategoria(){
-        return ResponseEntity.ok(categoriaService.listarCategorias());
+    public ResponseEntity<List<CategoriaDTO>> listarCategoria(){
+        List<CategoriaEntity> categorias = categoriaService.listarCategorias();
+        List<CategoriaDTO> categoriasDTO = categorias.stream()
+            .map(categoriaMapper::toDTO)
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(categoriasDTO);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> buscarCategoriaPorId(@PathVariable Long id){
         try {
-            return ResponseEntity.ok(categoriaService.buscarCategoriaPorId(id));
+            CategoriaEntity categoria = categoriaService.buscarCategoriaPorId(id);
+            CategoriaDTO categoriaDTO = categoriaMapper.toDTO(categoria);
+            return ResponseEntity.ok(categoriaDTO);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
