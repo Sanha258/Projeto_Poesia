@@ -16,6 +16,7 @@ import Projeto_Poesia.BackEnd.Repository.PoemaRepository;
 import Projeto_Poesia.BackEnd.Repository.UsuarioRepository;
 import Projeto_Poesia.BackEnd.Service.PoemaService;
 import Projeto_Poesia.BackEnd.Service.util.ValidacaoUtil;
+import Projeto_Poesia.BackEnd.Mapper.PoemaMapper;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -29,6 +30,9 @@ public class PoemaServiceImp implements PoemaService {
 
     @Autowired
     private CategoriaRepository categoriaRepository;
+
+    @Autowired
+    private PoemaMapper poemaMapper;
 
     @Override
     @Transactional
@@ -51,10 +55,6 @@ public class PoemaServiceImp implements PoemaService {
                 throw new IllegalArgumentException("O conteúdo do poema deve ter no máximo 500 caracteres.");
             }
 
-            // Validação de caracteres especiais
-            ValidacaoUtil.validarCaracteres(poemaDTO.getTitulo(), "título");
-            ValidacaoUtil.validarCaracteres(poemaDTO.getConteudo(), "conteúdo");
-
             // Busca autor e categoria com tratamento de erro mais descritivo
             UsuarioEntity autor = usuarioRepository.findById(poemaDTO.getAutor())
                 .orElseThrow(() -> new IllegalArgumentException("Autor com ID " + poemaDTO.getAutor() + " não encontrado."));
@@ -62,14 +62,10 @@ public class PoemaServiceImp implements PoemaService {
             CategoriaEntity categoria = categoriaRepository.findById(poemaDTO.getCategoria())
                 .orElseThrow(() -> new IllegalArgumentException("Categoria com ID " + poemaDTO.getCategoria() + " não encontrada."));
 
-             PoemaEntity poema = new PoemaEntity();
-             poema.setTitulo(poemaDTO.getTitulo().trim());
-             poema.setConteudo(poemaDTO.getConteudo().trim());
-             poema.setData(LocalDateTime.now()); // ADIÇÃO CRUCIAL
-             poema.setAutor(autor);
-             poema.setCategoria(categoria);
+            PoemaEntity poema = poemaMapper.toEntity(poemaDTO, autor, categoria);
+            poema.setData(LocalDateTime.now());
 
-             return poemaRepository.save(poema);
+            return poemaRepository.save(poema);
             
         } catch (DataIntegrityViolationException e) {
             throw new IllegalArgumentException("Erro de integridade de dados: " + e.getMostSpecificCause().getMessage());

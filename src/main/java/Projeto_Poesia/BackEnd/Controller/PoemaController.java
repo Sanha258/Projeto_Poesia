@@ -2,6 +2,7 @@ package Projeto_Poesia.BackEnd.Controller;
 
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import Projeto_Poesia.BackEnd.DTO.PoemaDTO;
 import Projeto_Poesia.BackEnd.Entity.PoemaEntity;
 import Projeto_Poesia.BackEnd.Service.PoemaService;
+import Projeto_Poesia.BackEnd.Mapper.PoemaMapper;
 
 @RestController
 @RequestMapping("/poema")
@@ -25,6 +27,8 @@ public class PoemaController {
 
     @Autowired
     private PoemaService poemaService;
+    @Autowired
+    private PoemaMapper poemaMapper;
 
     @PostMapping
     public ResponseEntity<?> cadastrarPoema(@RequestBody PoemaDTO poemaDTO) {
@@ -80,7 +84,10 @@ public class PoemaController {
             if (poemas.isEmpty()) {
                 return ResponseEntity.noContent().build();
             }
-            return ResponseEntity.ok(poemas);
+            List<PoemaDTO> poemasDTO = poemas.stream()
+                .map(poemaMapper::toDTO)
+                .collect(Collectors.toList());
+            return ResponseEntity.ok(poemasDTO);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
