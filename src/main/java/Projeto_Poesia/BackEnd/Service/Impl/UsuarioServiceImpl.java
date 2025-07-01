@@ -2,16 +2,18 @@ package Projeto_Poesia.BackEnd.Service.Impl;
 
 import java.util.List;
 import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import Projeto_Poesia.BackEnd.DTO.UsuarioDTO;
 import Projeto_Poesia.BackEnd.Entity.AcessoEntity;
 import Projeto_Poesia.BackEnd.Entity.UsuarioEntity;
+import Projeto_Poesia.BackEnd.Mapper.UsuarioMapper;
 import Projeto_Poesia.BackEnd.Repository.AcessoRepository;
 import Projeto_Poesia.BackEnd.Repository.UsuarioRepository;
 import Projeto_Poesia.BackEnd.Service.UsuarioService;
 import Projeto_Poesia.BackEnd.Service.util.HashUtil;
-import Projeto_Poesia.BackEnd.Mapper.UsuarioMapper;
 
 @Service
 public class UsuarioServiceImpl implements UsuarioService {
@@ -64,9 +66,23 @@ public class UsuarioServiceImpl implements UsuarioService {
         }
 
         UsuarioEntity usuario = optionalUsuario.get();
+        
         usuario.setNome(usuarioDTO.getNome());
         usuario.setEmail(usuarioDTO.getEmail());
         usuario.setUser(usuarioDTO.getUser());
+
+        if (usuarioDTO.getAcesso() != null && 
+            usuarioDTO.getAcesso().getSenha() != null && 
+            !usuarioDTO.getAcesso().getSenha().isEmpty()) {
+            
+            String senhaAtualHash = HashUtil.gerarHashSHA256(usuarioDTO.getAcesso().getLogin());
+            if (!usuario.getAcesso().getSenha().equals(senhaAtualHash)) {
+                throw new IllegalArgumentException("Senha atual incorreta");
+            }
+            
+            String novaSenhaHash = HashUtil.gerarHashSHA256(usuarioDTO.getAcesso().getSenha());
+            usuario.getAcesso().setSenha(novaSenhaHash);
+        }
 
         return usuarioRepository.save(usuario);
     }
