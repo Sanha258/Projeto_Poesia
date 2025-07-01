@@ -2,8 +2,10 @@ package Projeto_Poesia.BackEnd.Controller;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,13 +14,17 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import Projeto_Poesia.BackEnd.DTO.LoginRequest;
 import Projeto_Poesia.BackEnd.DTO.UsuarioDTO;
 import Projeto_Poesia.BackEnd.Entity.UsuarioEntity;
-import Projeto_Poesia.BackEnd.Service.UsuarioService;
 import Projeto_Poesia.BackEnd.Mapper.UsuarioMapper;
+import Projeto_Poesia.BackEnd.Service.UsuarioService;
+
 
 @RestController
 @RequestMapping("/cadastro")
+@CrossOrigin(origins = "*")
 public class UsuarioController {
     
     @Autowired
@@ -28,7 +34,7 @@ public class UsuarioController {
     private UsuarioMapper usuarioMapper;
 
     @PostMapping
-    public ResponseEntity<?> salvar(@RequestBody UsuarioDTO usuarioDTO){
+    public ResponseEntity<?> salvar(@RequestBody UsuarioDTO usuarioDTO) {
         try {
             UsuarioEntity usuario = usuarioService.cadastrarUsuario(usuarioDTO);
             UsuarioDTO usuarioRetorno = usuarioMapper.toDTO(usuario);
@@ -38,8 +44,21 @@ public class UsuarioController {
         }
     }
 
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+        try {
+            UsuarioEntity usuario = usuarioService.validarLogin(
+                loginRequest.getEmail(), 
+                loginRequest.getSenha()
+            );
+            return ResponseEntity.ok(usuario);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(401).body(e.getMessage());
+        }
+    }
+
     @GetMapping
-    public ResponseEntity<List<UsuarioDTO>> listarUsuarios(){
+    public ResponseEntity<List<UsuarioDTO>> listarUsuarios() {
         List<UsuarioEntity> usuarios = usuarioService.listarUsuarios();
         List<UsuarioDTO> usuariosDTO = usuarios.stream()
             .map(usuarioMapper::toDTO)
@@ -48,7 +67,7 @@ public class UsuarioController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UsuarioDTO> buscarUsuarioPorId(@PathVariable Long id){
+    public ResponseEntity<UsuarioDTO> buscarUsuarioPorId(@PathVariable Long id) {
         return usuarioService.buscarUsuarioPorId(id)
             .map(usuarioMapper::toDTO)
             .map(ResponseEntity::ok)
@@ -56,7 +75,7 @@ public class UsuarioController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UsuarioDTO> atualizarUsuario(@PathVariable Long id, @RequestBody UsuarioDTO usuarioDTO){
+    public ResponseEntity<UsuarioDTO> atualizarUsuario(@PathVariable Long id, @RequestBody UsuarioDTO usuarioDTO) {
         try {
             UsuarioEntity usuarioAtualizado = usuarioService.atualizarUsuario(id, usuarioDTO);
             UsuarioDTO usuarioRetorno = usuarioMapper.toDTO(usuarioAtualizado);
@@ -75,5 +94,4 @@ public class UsuarioController {
             return ResponseEntity.notFound().build();
         }
     }
-
 }

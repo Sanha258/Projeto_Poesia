@@ -167,6 +167,16 @@ public class PoemaServiceImp implements PoemaService {
         return poemaRepository.findByCategoriaId(categoriaId);
     }
 
+    @Override
+    public List<PoemaEntity> listarPorAutorUsername(String user) {
+    
+        UsuarioEntity autor = usuarioRepository.findByUser(user)
+            .orElseThrow(() -> new IllegalArgumentException("Autor com username '" + user + "' não encontrado."));
+        
+        
+        return poemaRepository.findByAutorId(autor.getId());
+    }
+
 }
     
 
