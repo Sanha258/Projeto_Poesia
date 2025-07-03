@@ -8,7 +8,7 @@ import Projeto_Poesia.BackEnd.Mapper.AcessoMapper;
 
 @Component
 public class UsuarioMapper {
-    @Autowired
+    @Autowired 
     private AcessoMapper acessoMapper;
     
     /**
