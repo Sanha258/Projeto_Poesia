@@ -1,5 +1,6 @@
 package Projeto_Poesia.BackEnd.Service.Impl;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +59,7 @@ public class ComentarServiceImpl implements ComentarService{
 
         comentario.setTexto(comentarDTO.getTexto().trim());
         comentario.setEditado(true);
+        comentario.setDataEdicao(LocalDateTime.now());
         
         return comentarRepository.save(comentario);
     }

@@ -39,6 +39,10 @@ public class ComentarEntity {
     @Column(nullable = false)
     private boolean editado = false;
 
+    @Column(name = "data_edicao")
+    @JsonFormat(pattern = "dd/MM/yyyy HH:mm")
+    private LocalDateTime dataEdicao;
+
     public ComentarEntity() {
     }
 
@@ -95,6 +99,14 @@ public class ComentarEntity {
 
     public void setEditado(boolean editado) {
         this.editado = editado;
+    }
+
+    public LocalDateTime getDataEdicao() {
+    return dataEdicao;
+}
+
+    public void setDataEdicao(LocalDateTime dataEdicao) {
+        this.dataEdicao = dataEdicao;
     }
 
     
