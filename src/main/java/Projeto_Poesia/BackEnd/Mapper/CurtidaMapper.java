@@ -1,10 +1,13 @@
 package Projeto_Poesia.BackEnd.Mapper;
 
+import org.springframework.stereotype.Component;
+
 import Projeto_Poesia.BackEnd.DTO.CurtidaDTO;
 import Projeto_Poesia.BackEnd.Entity.CurtidaEntity;
 import Projeto_Poesia.BackEnd.Entity.PoemaEntity;
 import Projeto_Poesia.BackEnd.Entity.UsuarioEntity;
 
+@Component
 public class CurtidaMapper {
    
      public CurtidaDTO toDTO(CurtidaEntity curtidaEntity) {
