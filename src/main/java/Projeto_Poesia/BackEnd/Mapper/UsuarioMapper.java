@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import Projeto_Poesia.BackEnd.DTO.UsuarioDTO;
 import Projeto_Poesia.BackEnd.Entity.UsuarioEntity;
-import Projeto_Poesia.BackEnd.Mapper.AcessoMapper;
+
 
 @Component
 public class UsuarioMapper {
