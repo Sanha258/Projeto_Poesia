@@ -12,6 +12,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.CascadeType;
+import java.util.List;
 
 @Entity
 @Table(name = "poema")
@@ -38,6 +41,15 @@ public class PoemaEntity {
     @ManyToOne
     @JoinColumn(name = "categoria_id", nullable = false)
     private CategoriaEntity categoria;
+
+    @OneToMany(mappedBy = "poema", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<ComentarEntity> comentarios;
+
+    @OneToMany(mappedBy = "poema", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<CurtidaEntity> curtidas;
+
+    @OneToMany(mappedBy = "poema", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<SalvoEntity> salvos;
 
     public PoemaEntity() {}
 
