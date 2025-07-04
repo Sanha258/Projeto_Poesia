@@ -43,14 +43,15 @@ public class CurtidaController {
         }
     }
 
-    @GetMapping("/verificar")
-    public ResponseEntity<Boolean> verificarCurtida(@RequestBody CurtidaDTO curtidaDTO) {
-        return ResponseEntity.ok(curtidaService.verificarCurtida(curtidaDTO));
-    }
-
     @GetMapping("/contar/{poemaId}")
     public ResponseEntity<Integer> contarCurtidasPoema(@PathVariable Long poemaId) {
         return ResponseEntity.ok(curtidaService.contarCurtidasPoema(poemaId));
+    }
+
+    @GetMapping("/status/{usuarioId}/{poemaId}")
+    public ResponseEntity<Boolean> verificarStatusCurtida(@PathVariable Long usuarioId, @PathVariable Long poemaId) {
+        return ResponseEntity.ok(curtidaService.verificarCurtida(new CurtidaDTO(usuarioId, poemaId)));
+        
     }
 
     
