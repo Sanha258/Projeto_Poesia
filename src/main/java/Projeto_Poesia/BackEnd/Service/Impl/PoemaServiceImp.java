@@ -11,6 +11,7 @@ import Projeto_Poesia.BackEnd.DTO.PoemaDTO;
 import Projeto_Poesia.BackEnd.Entity.CategoriaEntity;
 import Projeto_Poesia.BackEnd.Entity.PoemaEntity;
 import Projeto_Poesia.BackEnd.Entity.UsuarioEntity;
+import Projeto_Poesia.BackEnd.Mapper.PoemaMapper;
 import Projeto_Poesia.BackEnd.Repository.CategoriaRepository;
 import Projeto_Poesia.BackEnd.Repository.PoemaRepository;
 import Projeto_Poesia.BackEnd.Repository.UsuarioRepository;
@@ -30,11 +31,13 @@ public class PoemaServiceImp implements PoemaService {
     @Autowired
     private CategoriaRepository categoriaRepository;
 
+    @Autowired
+    private PoemaMapper poemaMapper;
+
     @Override
     @Transactional
     public PoemaEntity cadastrarPoema(PoemaDTO poemaDTO) {
         try {
-            // Validação dos campos obrigatórios
             if (poemaDTO.getTitulo() == null || poemaDTO.getTitulo().trim().isEmpty()) {
                 throw new IllegalArgumentException("O título do poema é obrigatório.");
             }
@@ -43,7 +46,6 @@ public class PoemaServiceImp implements PoemaService {
                 throw new IllegalArgumentException("O conteúdo do poema é obrigatório.");
             }
 
-             // Validação de caracteres especiais
             ValidacaoUtil.validarCaracteres(poemaDTO.getTitulo(), "título");
             ValidacaoUtil.validarCaracteres(poemaDTO.getConteudo(), "conteúdo");
 
@@ -51,25 +53,16 @@ public class PoemaServiceImp implements PoemaService {
                 throw new IllegalArgumentException("O conteúdo do poema deve ter no máximo 500 caracteres.");
             }
 
-            // Validação de caracteres especiais
-            ValidacaoUtil.validarCaracteres(poemaDTO.getTitulo(), "título");
-            ValidacaoUtil.validarCaracteres(poemaDTO.getConteudo(), "conteúdo");
-
-            // Busca autor e categoria com tratamento de erro mais descritivo
             UsuarioEntity autor = usuarioRepository.findById(poemaDTO.getAutor())
                 .orElseThrow(() -> new IllegalArgumentException("Autor com ID " + poemaDTO.getAutor() + " não encontrado."));
 
             CategoriaEntity categoria = categoriaRepository.findById(poemaDTO.getCategoria())
                 .orElseThrow(() -> new IllegalArgumentException("Categoria com ID " + poemaDTO.getCategoria() + " não encontrada."));
 
-             PoemaEntity poema = new PoemaEntity();
-             poema.setTitulo(poemaDTO.getTitulo().trim());
-             poema.setConteudo(poemaDTO.getConteudo().trim());
-             poema.setData(LocalDateTime.now()); // ADIÇÃO CRUCIAL
-             poema.setAutor(autor);
-             poema.setCategoria(categoria);
+            PoemaEntity poema = poemaMapper.toEntity(poemaDTO, autor, categoria);
+            poema.setData(LocalDateTime.now());
 
-             return poemaRepository.save(poema);
+            return poemaRepository.save(poema);
             
         } catch (DataIntegrityViolationException e) {
             throw new IllegalArgumentException("Erro de integridade de dados: " + e.getMostSpecificCause().getMessage());
@@ -111,12 +104,10 @@ public class PoemaServiceImp implements PoemaService {
             PoemaEntity poemaExistente = poemaRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Poema não encontrado."));
 
-            // Verifica se o autor do DTO é o mesmo do poema existente
             if (!poemaExistente.getAutor().getId().equals(poemaDTO.getAutor())) {
                 throw new IllegalArgumentException("Apenas o autor pode editar o poema.");
             }
 
-            // Validações
             if (poemaDTO.getTitulo() != null && !poemaDTO.getTitulo().trim().isEmpty()) {
                 ValidacaoUtil.validarCaracteres(poemaDTO.getTitulo(), "título");
                 poemaExistente.setTitulo(poemaDTO.getTitulo().trim());
@@ -149,7 +140,6 @@ public class PoemaServiceImp implements PoemaService {
             throw new IllegalArgumentException("ID do autor inválido");
         }
         
-        // Verifica se o autor existe antes de buscar os poemas
         if (!usuarioRepository.existsById(autorId)) {
             throw new IllegalArgumentException("Autor com ID " + autorId + " não encontrado");
         }

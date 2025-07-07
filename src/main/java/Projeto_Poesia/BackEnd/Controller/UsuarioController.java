@@ -1,6 +1,7 @@
 package Projeto_Poesia.BackEnd.Controller;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import Projeto_Poesia.BackEnd.DTO.UsuarioDTO;
 import Projeto_Poesia.BackEnd.Entity.UsuarioEntity;
 import Projeto_Poesia.BackEnd.Service.UsuarioService;
+import Projeto_Poesia.BackEnd.Mapper.UsuarioMapper;
 
 @RestController
 @RequestMapping("/cadastro")
@@ -21,33 +23,44 @@ public class UsuarioController {
     
     @Autowired
     private UsuarioService usuarioService;
+    
+    @Autowired
+    private UsuarioMapper usuarioMapper;
 
     @PostMapping
     public ResponseEntity<?> salvar(@RequestBody UsuarioDTO usuarioDTO){
         try {
             UsuarioEntity usuario = usuarioService.cadastrarUsuario(usuarioDTO);
-            return ResponseEntity.ok(usuario);
+            UsuarioDTO usuarioRetorno = usuarioMapper.toDTO(usuario);
+            return ResponseEntity.ok(usuarioRetorno);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
     @GetMapping
-    public ResponseEntity<List<UsuarioEntity>> listarUsuarios(){
+    public ResponseEntity<List<UsuarioDTO>> listarUsuarios(){
         List<UsuarioEntity> usuarios = usuarioService.listarUsuarios();
-        return ResponseEntity.ok(usuarios);
+        List<UsuarioDTO> usuariosDTO = usuarios.stream()
+            .map(usuarioMapper::toDTO)
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(usuariosDTO);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UsuarioEntity> buscarUsuarioPorId(@PathVariable Long id){
-        return usuarioService.buscarUsuarioPorId(id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<UsuarioDTO> buscarUsuarioPorId(@PathVariable Long id){
+        return usuarioService.buscarUsuarioPorId(id)
+            .map(usuarioMapper::toDTO)
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UsuarioEntity> atualizarUsuario(@PathVariable Long id, @RequestBody UsuarioDTO usuarioDTO){
+    public ResponseEntity<UsuarioDTO> atualizarUsuario(@PathVariable Long id, @RequestBody UsuarioDTO usuarioDTO){
         try {
             UsuarioEntity usuarioAtualizado = usuarioService.atualizarUsuario(id, usuarioDTO);
-            return ResponseEntity.ok(usuarioAtualizado);
+            UsuarioDTO usuarioRetorno = usuarioMapper.toDTO(usuarioAtualizado);
+            return ResponseEntity.ok(usuarioRetorno);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
