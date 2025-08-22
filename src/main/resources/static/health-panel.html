@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Painel de Health</title>
+    <style>
+        .health-container {
+            display: flex;
+            flex-direction: row;
+            gap: 40px;
+            align-items: flex-start;
+            padding: 20px;
+        }
+        .health-item {
+            background: #f2f2f2;
+            border-radius: 8px;
+            padding: 16px 24px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            min-width: 120px;
+            text-align: center;
+        }
+        .health-title {
+            font-size: 1.2em;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="health-container" id="healthContainer">
+        <!-- Itens serão preenchidos via JS -->
+    </div>
+    <script>
+        fetch('/actuator/health')
+            .then(response => response.json())
+            .then(data => {
+                const container = document.getElementById('healthContainer');
+                container.innerHTML = '';
+
+                // Função recursiva para renderizar qualquer nível de detalhes
+                function renderDetails(key, value) {
+                    const div = document.createElement('div');
+                    div.className = 'health-item';
+                    let html = `<div class="health-title"><strong>${key}</strong></div>`;
+                    if (typeof value === 'object' && value !== null) {
+                        Object.entries(value).forEach(([subKey, subValue]) => {
+                            if (typeof subValue === 'object' && subValue !== null) {
+                                html += `<div><strong>${subKey}:</strong></div>`;
+                                html += `<div style="font-size:0.9em;">${Object.entries(subValue).map(([k, v]) => `<div>${k}: ${v}</div>`).join('')}</div>`;
+                            } else {
+                                html += `<div><strong>${subKey}:</strong> ${subValue}</div>`;
+                            }
+                        });
+                    } else {
+                        html += `<div>${value}</div>`;
+                    }
+                    div.innerHTML = html;
+                    container.appendChild(div);
+                }
+
+                // Status principal
+                renderDetails('Status Geral', data.status);
+
+                // Detalhes dos componentes
+                if (data.details) {
+                    Object.entries(data.details).forEach(([key, value]) => {
+                        renderDetails(key, value);
+                    });
+                }
+            });
+    </script>
+</body>
+</html>
