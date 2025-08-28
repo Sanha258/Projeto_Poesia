@@ -12,6 +12,7 @@ import Projeto_Poesia.BackEnd.Entity.UsuarioEntity;
 import Projeto_Poesia.BackEnd.Mapper.UsuarioMapper;
 import Projeto_Poesia.BackEnd.Repository.AcessoRepository;
 import Projeto_Poesia.BackEnd.Repository.UsuarioRepository;
+import Projeto_Poesia.BackEnd.Service.EmailService;
 import Projeto_Poesia.BackEnd.Service.UsuarioService;
 import Projeto_Poesia.BackEnd.Service.util.HashUtil;
 
@@ -24,6 +25,9 @@ public class UsuarioServiceImpl implements UsuarioService {
     private AcessoRepository acessoRepository;
     @Autowired
     private UsuarioMapper usuarioMapper;
+    @Autowired
+    private EmailService emailService;
+
 
     @Override
     public UsuarioEntity cadastrarUsuario(UsuarioDTO usuarioDTO){
@@ -45,6 +49,13 @@ public class UsuarioServiceImpl implements UsuarioService {
 
         UsuarioEntity usuarioSalvo = usuarioRepository.save(usuario);
 
+        if (usuarioSalvo.getId() != null) {
+            emailService.enviarEmail(usuarioSalvo.getEmail(),
+                "Cadastro realizado com sucesso",
+                "Bem-vindo ao sistema, " + usuarioSalvo.getNome()
+            );    
+        }
+        
         return usuarioSalvo;
     }
 
