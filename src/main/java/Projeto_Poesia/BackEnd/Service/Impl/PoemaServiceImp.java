@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
@@ -15,12 +16,15 @@ import Projeto_Poesia.BackEnd.Mapper.PoemaMapper;
 import Projeto_Poesia.BackEnd.Repository.CategoriaRepository;
 import Projeto_Poesia.BackEnd.Repository.PoemaRepository;
 import Projeto_Poesia.BackEnd.Repository.UsuarioRepository;
+import Projeto_Poesia.BackEnd.Service.EmailService;
 import Projeto_Poesia.BackEnd.Service.PoemaService;
 import Projeto_Poesia.BackEnd.Service.util.ValidacaoUtil;
 import jakarta.transaction.Transactional;
 
 @Service
 public class PoemaServiceImp implements PoemaService {
+
+    //private final Service.EmailService emailService;
 
     @Autowired
     private PoemaRepository poemaRepository;
@@ -33,6 +37,10 @@ public class PoemaServiceImp implements PoemaService {
 
     @Autowired
     private PoemaMapper poemaMapper;
+
+    //PoemaServiceImp(Service.EmailService emailService) {
+        //this.emailService = emailService;
+    //}
 
     @Override
     @Transactional
@@ -62,7 +70,11 @@ public class PoemaServiceImp implements PoemaService {
             PoemaEntity poema = poemaMapper.toEntity(poemaDTO, autor, categoria);
             poema.setData(LocalDateTime.now());
 
+        
+            EmailService.enviarEmail("williamsanha258@gmail.com", "novo poema cadastrado", "uma nova poema foi cadastrada:" + salvo.getAutor()) ;
+
             return poemaRepository.save(poema);
+
             
         } catch (DataIntegrityViolationException e) {
             throw new IllegalArgumentException("Erro de integridade de dados: " + e.getMostSpecificCause().getMessage());

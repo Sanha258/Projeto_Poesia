@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Views de Status Poesia</title>
+  <style>
+    :root{
+      --bg:#f0f4f8;
+      --panel:#ffffff;
+      --card:#e2e8f0;
+      --text:#1f2937;
+      --muted:#6b7280;
+      --ok:#16a34a;
+      --warn:#f59e0b;
+      --err:#ef4444;
+      --chip:#dbeafe;
+      --border:#cbd5e1;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial}
+    .container{max-width:1100px;margin:24px auto;padding:0 16px}
+
+    header.app{
+      display:flex;align-items:center;justify-content:space-between;gap:16px;
+      background:var(--panel);
+      border:1px solid var(--border);padding:16px 18px;border-radius:12px;
+      box-shadow:0 4px 12px rgba(0,0,0,.1);
+    }
+    .brand{display:flex;gap:12px;align-items:center}
+    .brand .logo{width:38px;height:38px;display:grid;place-items:center;border-radius:12px;background:#93c5fd;border:1px solid var(--border)}
+    .brand h1{font-size:18px;margin:0}
+    .root-status{display:flex;align-items:center;gap:10px}
+
+    .badge{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;font-size:12px;border:1px solid var(--border);background:var(--chip)}
+    .badge.ok{background:rgba(22,163,74,.15);border-color:rgba(22,163,74,.35)}
+    .badge.warn{background:rgba(245,158,11,.15);border-color:rgba(245,158,11,.35)}
+    .badge.err{background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.35)}
+
+    .controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+    button{border-radius:8px;border:1px solid var(--border);background:#93c5fd;color:var(--text);padding:8px 12px;cursor:pointer}
+    button:hover{filter:brightness(1.1)}
+
+    .grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(260px, 1fr));gap:14px;margin-top:18px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;box-shadow:0 4px 10px rgba(0,0,0,.05)}
+    .card h3{margin:0 0 8px;font-size:15px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .caps{letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-size:11px}
+    .kv{margin:8px 0 2px;border-top:1px dashed var(--border);padding-top:8px}
+    .kv-row{display:flex;justify-content:space-between;gap:10px;padding:2px 0;font-size:12px;color:#374151}
+    .kv-row code{color:#1e3a8a;background:#dbeafe;border:1px solid var(--border);padding:2px 6px;border-radius:6px}
+
+    details{margin-top:6px}
+    summary{cursor:pointer;color:#3b82f6;font-size:12px}
+    .footer{margin-top:18px;color:var(--muted);font-size:12px;text-align:center}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="app">
+      <div class="brand">
+        <div>
+          <h1>Health Status Viewer</h1>
+          <div class="caps">Saude de Aplicativo Poesia</div>
+        </div>
+      </div>
+      <div class="root-status">
+        <span class="caps">Sistema:</span>
+        <span id="rootBadge" class="badge">—</span>
+      </div>
+    </header>
+
+    <section class="controls">
+      <button id="btnFetch">Carregar Poesia</button>
+    </section>
+
+    <section id="cards" class="grid" aria-live="polite"></section>
+
+    <div class="footer"></div>
+  </div>
+
+  <script>
+    const SAMPLE_HEALTH = {
+      "status": "UP",
+      "components": {
+        "db": {"status": "UP","details": {"database": "MySQL","validationQuery": "isValid()"}},
+        "diskSpace": {"status": "UP","details": {"total": 511419936768,"free": 421662711808,"threshold": 10485760,"path": "C:\\Users\\william.sanha\\Documents\\Projeto_Poesia-main\\.","exists": true}},
+        "ping": {"status": "UP"},
+        "poema": {"status": "UP","details": {"Aplicação": "Poema API está Saudavel","Versão": "1.0.0","Quantidade de Poemas": 0,"Banco de dados": "ok","Origem": "API"}},
+        "responseTime": {"status": "UP","details": {"API externa": "https://api.github.com","Tempo de Resposta (ms)": 20,"classificação": "otimo","status": "Api externa ok","Origem": "API"}},
+        "ssl": {"status": "UP","details": {"validChains": [],"invalidChains": []}}
+      }
+    };
+
+    const el = sel => document.querySelector(sel);
+    function statusClass(s){
+      const v = (s||'').toString().toUpperCase();
+      if(v === 'UP' || v === 'HEALTHY' || v === 'OK') return 'ok';
+      if(v === 'DOWN' || v === 'OUT_OF_SERVICE' || v === 'ERROR') return 'err';
+      return 'warn';
+    }
+    function makeBadge(status){
+      const cls = statusClass(status);
+      const icon = cls==='ok' ? '✅' : cls==='err' ? '⛔' : '⚠️';
+      return `<span class="badge ${cls}">${icon} ${status||'—'}</span>`;
+    }
+
+    function renderHealth(data){
+      el('#rootBadge').outerHTML = makeBadge(data.status);
+      const wrap = el('#cards');
+      wrap.innerHTML = '';
+      const comps = data.components || {};
+      const names = Object.keys(comps);
+      if(!names.length){ wrap.innerHTML = '<div class="card"><div>Nenhum componente encontrado.</div></div>'; return; }
+      names.sort((a,b)=>a.localeCompare(b));
+      for(const name of names){
+        const c = comps[name]||{};
+        const status = c.status || '—';
+        const header = `<h3><span>${name}</span>${makeBadge(status)}</h3>`;
+        let detailsHtml = '';
+        if(c.details && typeof c.details === 'object'){
+          const rows = Object.entries(c.details).map(([k,v])=>{
+            const val = (typeof v === 'object') ? JSON.stringify(v) : v;
+            return `<div class="kv-row"><span>${k}</span><code>${val}</code></div>`;
+          }).join('');
+          detailsHtml = `<details><summary>ver detalhes</summary><div class="kv">${rows}</div></details>`;
+        }
+        const card = document.createElement('article');
+        card.className = 'card';
+        card.innerHTML = header + detailsHtml;
+        wrap.appendChild(card);
+      }
+    }
+
+    async function fetchHealth(){
+      try{
+        const res = await fetch('/actuator/health', {headers:{'Accept':'application/json'}});
+        if(!res.ok) throw new Error('HTTP '+res.status);
+        const json = await res.json();
+        renderHealth(json);
+      }catch(err){
+        console.warn('Falha ao carregar /actuator/health:', err);
+        renderHealth(SAMPLE_HEALTH);
+      }
+    }
+
+    el('#btnFetch').addEventListener('click', fetchHealth);
+    renderHealth(SAMPLE_HEALTH);
+  </script>
+</body>
+</html>
+
+

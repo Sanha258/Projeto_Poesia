@@ -1,6 +1,7 @@
 package Projeto_Poesia.BackEnd.Controller;
 
 
+import java.net.URI;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,16 +31,17 @@ public class PoemaController {
     @Autowired
     private PoemaMapper poemaMapper;
 
-    @PostMapping
+   @PostMapping
     public ResponseEntity<?> cadastrarPoema(@RequestBody PoemaDTO poemaDTO) {
         try {
             PoemaEntity poema = poemaService.cadastrarPoema(poemaDTO);
-            return ResponseEntity.ok(poema);
+            return ResponseEntity
+                    .created(URI.create("/poema/" + poema.getId())) // gera Location no header
+                    .body(poema);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
     @GetMapping
     public ResponseEntity<List<PoemaEntity>> listarPoemas() {
         return ResponseEntity.ok(poemaService.listarPoemas());

@@ -1,79 +1,151 @@
 package Projeto_Poesia.BackEnd.Util.controller;
 
-import org.junit.jupiter.api.DisplayName;
+import Projeto_Poesia.BackEnd.Controller.PoemaController;
+import Projeto_Poesia.BackEnd.DTO.PoemaDTO;
+import Projeto_Poesia.BackEnd.Entity.PoemaEntity;
+import Projeto_Poesia.BackEnd.Service.PoemaService;
+import Projeto_Poesia.BackEnd.Mapper.PoemaMapper;
+
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+
+import static org.mockito.ArgumentMatchers.any;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-//import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-//import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import Projeto_Poesia.BackEnd.Repository.PoemaRepository;
-
-@SpringBootTest
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
+@WebMvcTest(PoemaController.class)
 public class PoemaControllerTest {
-    
+
     @Autowired
     private MockMvc mockMvc;
 
+    @MockBean
+    private PoemaService poemaService;
+
+    @MockBean
+    private PoemaMapper poemaMapper;
+
     @Autowired
-    private PoemaRepository repository;
+    private ObjectMapper objectMapper;
 
     @Test
-    @DisplayName("Deve cadastrar poema com sucesso")
-    void deveCadastrarPoema() throws Exception {
-        String tituloGerado = "flor" + System.currentTimeMillis();
-        String json = "{"
-            + "\"titulo\":\"" + tituloGerado + "\","
-            + "\"conteudo\":\"minha flor\","
-            + "\"data\":\"14/08/2025 00:00\","
-            + "\"autor\":{\"id\":1},"
-            + "\"categoria\":{\"id\":1}"
-            + "}";
+    void deveCadastrarPoemaComSucesso() throws Exception {
+        PoemaDTO dto = new PoemaDTO();
+        dto.setTitulo("Teste Poema");
+        PoemaEntity entity = new PoemaEntity();
+        entity.setId(1L);
+        entity.setTitulo("Teste Poema");
 
+        Mockito.when(poemaService.cadastrarPoema(any(PoemaDTO.class))).thenReturn(entity);
 
         mockMvc.perform(post("/poema")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(json))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
             .andExpect(status().isCreated())
-            .andExpect(header().exists("Location"))
-            .andExpect(jsonPath("$.id").isNumber())
-            .andExpect(jsonPath("$.titulo").value(tituloGerado))
-            .andExpect(jsonPath("$.conteudo").value("minha flor"))
-            .andExpect(jsonPath("$.data").value("14/08/2025 00:00"))
-            .andExpect(jsonPath("$.autor.id").value(1))
-            .andExpect(jsonPath("$.categoria.id").value(1));
+            .andExpect(jsonPath("$.id").value(1L))
+            .andExpect(jsonPath("$.titulo").value("Teste Poema"));
+    }
 
-            
-    }  
-
-    /*@Test
-    @DisplayName("Deve listar poemas incluindo recém criado")
+    @Test
     void deveListarPoemas() throws Exception {
-        if(repository.count() == 0) {
-            mockMvc.perform(post("/poema")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content("{"
-                        + "\"titulo\":\"flor de verão\","
-                        + "\"conteudo\":\"minha flor\","
-                        + "\"autor\":\"1\","
-                        + "\"categoria\":\"romantica\""
-                        + "}"))
-                    .andExpect(status().isCreated());
-        }
+        PoemaEntity p1 = new PoemaEntity();
+        p1.setId(1L);
+        p1.setTitulo("Poema 1");
 
-        mockMvc.perform(get("/poema")
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").exists());
-    }*/
+        PoemaEntity p2 = new PoemaEntity();
+        p2.setId(2L);
+        p2.setTitulo("Poema 2");
+
+        List<PoemaEntity> poemas = Arrays.asList(p1, p2);
+        Mockito.when(poemaService.listarPoemas()).thenReturn(poemas);
+
+        mockMvc.perform(get("/poema"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].id").value(1L))
+            .andExpect(jsonPath("$[1].id").value(2L));
+    }
+
+    @Test
+    void deveBuscarPoemaPorId() throws Exception {
+        PoemaEntity poema = new PoemaEntity();
+        poema.setId(10L);
+        poema.setTitulo("Poema Teste");
+
+        Mockito.when(poemaService.buscarPoema(10L)).thenReturn(poema);
+
+        mockMvc.perform(get("/poema/10"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").value(10L))
+            .andExpect(jsonPath("$.titulo").value("Poema Teste"));
+    }
+
+    @Test
+    void deveRetornarBadRequestQuandoNaoEncontrarPoema() throws Exception {
+        Mockito.when(poemaService.buscarPoema(99L))
+            .thenThrow(new IllegalArgumentException("Poema não encontrado"));
+
+        mockMvc.perform(get("/poema/99"))
+            .andExpect(status().isBadRequest())
+            .andExpect(content().string("Poema não encontrado"));
+    }
+
+    @Test
+    void deveListarPoemasPorCategoria() throws Exception {
+        PoemaEntity poema = new PoemaEntity();
+        poema.setId(1L);
+        poema.setTitulo("Poema Categoria");
+
+        PoemaDTO dto = new PoemaDTO();
+        dto.setTitulo("Poema Categoria");
+
+        Mockito.when(poemaService.listarPorCategoria(5L)).thenReturn(List.of(poema));
+        Mockito.when(poemaMapper.toDTO(poema)).thenReturn(dto);
+
+        mockMvc.perform(get("/poema/categoria/5"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].titulo").value("Poema Categoria"));
+    }
+
+    @Test
+    void deveRetornarNoContentQuandoCategoriaSemPoema() throws Exception {
+        Mockito.when(poemaService.listarPorCategoria(10L)).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/poema/categoria/10"))
+            .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void deveBuscarPorTitulo() throws Exception {
+        PoemaEntity poema = new PoemaEntity();
+        poema.setId(1L);
+        poema.setTitulo("Amor");
+
+        Mockito.when(poemaService.buscarPorTitulo("Amor")).thenReturn(List.of(poema));
+
+        mockMvc.perform(get("/poema/buscar?titulo=Amor"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].titulo").value("Amor"));
+    }
+
+    @Test
+    void deveDeletarPoema() throws Exception {
+        Mockito.doNothing().when(poemaService).deletarPoema(1L, 2L);
+
+        mockMvc.perform(delete("/poema/1/2"))
+            .andExpect(status().isOk())
+            .andExpect(content().string("Poema excluído com sucesso!"));
+    }
 }
