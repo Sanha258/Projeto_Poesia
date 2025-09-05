@@ -3,7 +3,10 @@ package Projeto_Poesia.BackEnd.Service.Impl;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Pageable;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import Projeto_Poesia.BackEnd.DTO.UsuarioDTO;
@@ -28,6 +31,10 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Autowired
     private EmailService emailService;
 
+    @Transactional(readOnly = true)
+    public Page<UsuarioDTO> listar(Pageable pageable) {
+        return usuarioRepository.findAll(pageable).map(usuarioMapper::toDTO);
+    }
 
     @Override
     public UsuarioEntity cadastrarUsuario(UsuarioDTO usuarioDTO){

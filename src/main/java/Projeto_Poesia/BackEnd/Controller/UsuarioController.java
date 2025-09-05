@@ -1,8 +1,13 @@
 package Projeto_Poesia.BackEnd.Controller;
 
+import org.springframework.data.domain.Pageable;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,6 +32,14 @@ public class UsuarioController {
     @Autowired
     private UsuarioMapper usuarioMapper;
 
+    @GetMapping
+    public Page<UsuarioDTO> listar(
+        @PageableDefault(size = 2, sort = "id", direction = Sort.Direction.DESC)
+        Pageable pageable
+    ) {
+        return usuarioService.listar(pageable); 
+    }
+
     @PostMapping
     public ResponseEntity<?> salvar(@RequestBody UsuarioDTO usuarioDTO){
         try {
@@ -38,7 +51,7 @@ public class UsuarioController {
         }
     }
 
-    @GetMapping
+    @GetMapping("/todos")
     public ResponseEntity<List<UsuarioDTO>> listarUsuarios(){
         List<UsuarioEntity> usuarios = usuarioService.listarUsuarios();
         List<UsuarioDTO> usuariosDTO = usuarios.stream()
