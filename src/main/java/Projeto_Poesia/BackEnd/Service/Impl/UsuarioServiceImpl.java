@@ -6,6 +6,8 @@ import java.util.Optional;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Pageable;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +32,8 @@ public class UsuarioServiceImpl implements UsuarioService {
     private UsuarioMapper usuarioMapper;
     @Autowired
     private EmailService emailService;
+    @Autowired
+    private MessageSource messageSource;
 
     @Transactional(readOnly = true)
     public Page<UsuarioDTO> listar(Pageable pageable) {
@@ -39,7 +43,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     public UsuarioEntity cadastrarUsuario(UsuarioDTO usuarioDTO){
         if (usuarioRepository.findByEmail(usuarioDTO.getEmail()).isPresent()) {
-            throw new IllegalArgumentException("Email já cadastrado!");
+            throw new IllegalArgumentException(messageSource.getMessage("email.cadastro.erro", new Object[]{usuarioDTO.getEmail()}, LocaleContextHolder.getLocale()));
         }
 
         String senhaHash = HashUtil.gerarHashSHA256(usuarioDTO.getAcesso().getSenha());
